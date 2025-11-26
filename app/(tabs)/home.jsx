@@ -142,7 +142,7 @@ export default function StudentHomeScreen() {
                 </View>
 
                 <Text style={styles.sectionTitle}>
-                    {allItems.length > 0 ? 'Your Classes & Quizzes' : 'Get Started'}
+                    {allItems.length > 0 ? ' Classes & Quizzes' : 'Get Started'}
                 </Text>
 
                 <View style={styles.classesList}>
@@ -161,7 +161,7 @@ export default function StudentHomeScreen() {
                                 onPress={() => {
                                     if (item.type === 'class') {
                                         router.push({
-                                            pathname: '/class-detail',
+                                            pathname: '/class',
                                             params: { classId: item.code, className: item.name }
                                         });
                                     } else {

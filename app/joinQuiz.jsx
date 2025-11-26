@@ -117,22 +117,6 @@ export default function JoinQuizScreen() {
         style={styles.container}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
       >
-        <View style={styles.header}>
-          <TouchableOpacity 
-            onPress={() => !loading && router.back()} 
-            disabled={loading}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          >
-            <Ionicons 
-              name="arrow-back" 
-              size={24} 
-              color={loading ? '#ccc' : '#000'} 
-            />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Join Quiz</Text>
-          <View style={{ width: 24 }} />
-        </View>
-
         <View style={styles.content}>
           <View style={styles.iconCircle}>
             <Text style={styles.icon}>🎯</Text>
@@ -142,8 +126,6 @@ export default function JoinQuizScreen() {
           <Text style={styles.subtitle}>
             Enter the 6-digit quiz code provided by your instructor.
           </Text>
-
-          {/* Code Input Boxes */}
           <View style={styles.codeContainer}>
             {code.map((digit, index) => (
               <TextInput

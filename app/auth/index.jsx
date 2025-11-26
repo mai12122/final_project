@@ -1,10 +1,10 @@
 import { useAuth } from '../../contexts/AuthContext';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View, Image } from 'react-native';
+import { Pressable, StyleSheet, Text, TextInput, View, Image, ScrollView } from 'react-native'; 
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const AnuwatLogo = require('../../assets/images/Anuwat.jpg');
+const AnuwatLogo = require('../../assets/images/anuwat.png');
 
 const AuthScreen = () => {
   const { login, register } = useAuth();
@@ -42,8 +42,7 @@ const AuthScreen = () => {
       setUsername('');
       setConfirmPassword('');
       setDateOfBirth('');
-    }
-    if (!isLogin) {
+    } else {
       setEmailOrUsername('');
       setPassword('');
     }
@@ -51,149 +50,155 @@ const AuthScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.logoContainer}>
-        <Image
-          source={AnuwatLogo}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-      </View>
-
-      <View style={styles.roleToggle}>
-        <Pressable 
-          style={[styles.toggleButton, userType === 'lecturer' && styles.activeToggle]}
-          onPress={() => setUserType('lecturer')}
-        >
-          <Text style={[styles.toggleText, userType === 'lecturer' && styles.activeToggleText]}>
-            Lecturer
-          </Text>
-        </Pressable>
-        <Pressable 
-          style={[styles.toggleButton, userType === 'student' && styles.activeToggle]}
-          onPress={() => setUserType('student')}
-        >
-          <Text style={[styles.toggleText, userType === 'student' && styles.activeToggleText]}>
-            Student
-          </Text>
-        </Pressable>
-      </View>
-
-      {isLogin ? (
-        <View style={styles.loginForm}>
-          <Text style={styles.label}>USERNAME OR EMAIL</Text>
-          <TextInput
-            placeholder="enter name or email"
-            value={emailOrUsername}
-            onChangeText={setEmailOrUsername}
-            style={styles.input}
-            autoCapitalize="none"
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.logoContainer}>
+          <Image
+            source={AnuwatLogo}
+            style={styles.logo}
+            resizeMode="contain"
           />
+        </View>
 
-          <Text style={styles.label}>PASSWORD</Text>
-          <TextInput
-            placeholder="••••••••"
-            value={password}
-            onChangeText={setPassword}
-            style={styles.input}
-            secureTextEntry
-          />
-
-          <Pressable style={styles.signInButton} onPress={handleSubmit}>
-            <Text style={styles.signInButtonText}>SIGN IN</Text>
+        <View style={styles.roleToggle}>
+          <Pressable 
+            style={[styles.toggleButton, userType === 'lecturer' && styles.activeToggle]}
+            onPress={() => setUserType('lecturer')}
+          >
+            <Text style={[styles.toggleText, userType === 'lecturer' && styles.activeToggleText]}>
+              Lecturer
+            </Text>
           </Pressable>
-
-          <Pressable onPress={() => {}}>
-            <Text style={styles.forgotPassword}>Forgot password?</Text>
-          </Pressable>
-
-          <Pressable onPress={toggleView} style={styles.registerLink}>
-            <Text style={styles.registerText}>Don’t have an account? </Text>
-            <Text style={styles.registerLinkText}>Register</Text>
+          <Pressable 
+            style={[styles.toggleButton, userType === 'student' && styles.activeToggle]}
+            onPress={() => setUserType('student')}
+          >
+            <Text style={[styles.toggleText, userType === 'student' && styles.activeToggleText]}>
+              Student
+            </Text>
           </Pressable>
         </View>
-      ) : (
-        <View style={styles.registerFormContainer}>
-          <Text style={styles.sectionTitle}>Get Started Now</Text>
-          <Text style={styles.sectionSubtitle}>Enter your Credentials to Create your account</Text>
 
-          <View style={styles.fieldRow}>
-            <Text style={styles.fieldLabel}>Name</Text>
+        {isLogin ? (
+          <View style={styles.loginForm}>
+            <Text style={styles.label}>USERNAME OR EMAIL</Text>
             <TextInput
-              placeholder="name"
-              value={name}
-              onChangeText={setName}
-              style={styles.fieldInput}
-              autoCapitalize="words"
-            />
-          </View>
-
-          <View style={styles.fieldRow}>
-            <Text style={styles.fieldLabel}>Email address</Text>
-            <TextInput
-              placeholder="xyz@xyz.com"
+              placeholder="enter name or email"
               value={emailOrUsername}
               onChangeText={setEmailOrUsername}
-              style={styles.fieldInput}
+              style={styles.input}
               autoCapitalize="none"
-              keyboardType="email-address"
             />
-          </View>
 
-          <View style={styles.doubleFieldRow}>
-            <View style={styles.halfField}>
-              <Text style={styles.fieldLabel}>Username</Text>
+            <Text style={styles.label}>PASSWORD</Text>
+            <TextInput
+              placeholder="••••••••"
+              value={password}
+              onChangeText={setPassword}
+              style={styles.input}
+              secureTextEntry
+            />
+
+            <Pressable style={styles.signInButton} onPress={handleSubmit}>
+              <Text style={styles.signInButtonText}>SIGN IN</Text>
+            </Pressable>
+
+            <Pressable onPress={() => {}}>
+              <Text style={styles.forgotPassword}>Forgot password?</Text>
+            </Pressable>
+
+            <Pressable onPress={toggleView} style={styles.registerLink}>
+              <Text style={styles.registerText}>Don’t have an account? </Text>
+              <Text style={styles.registerLinkText}>Register</Text>
+            </Pressable>
+          </View>
+        ) : (
+          <View style={styles.registerFormContainer}>
+            <Text style={styles.sectionTitle}>Get Started Now</Text>
+            <Text style={styles.sectionSubtitle}>Enter your Credentials to Create your account</Text>
+
+            <View style={styles.fieldRow}>
+              <Text style={styles.fieldLabel}>Name</Text>
               <TextInput
-                placeholder="username"
-                value={username}
-                onChangeText={setUsername}
-                style={[styles.halfInput, { marginRight: 6 }]}
+                placeholder="name"
+                value={name}
+                onChangeText={setName}
+                style={styles.fieldInput}
+                autoCapitalize="words"
+              />
+            </View>
+
+            <View style={styles.fieldRow}>
+              <Text style={styles.fieldLabel}>Email address</Text>
+              <TextInput
+                placeholder="xyz@xyz.com"
+                value={emailOrUsername}
+                onChangeText={setEmailOrUsername}
+                style={styles.fieldInput}
                 autoCapitalize="none"
+                keyboardType="email-address"
               />
             </View>
-            <View style={styles.halfField}>
-              <Text style={styles.fieldLabel}>Date of Birth</Text>
-              <TextInput
-                placeholder="DD/MM/YYYY"
-                value={dateOfBirth}
-                onChangeText={setDateOfBirth}
-                style={[styles.halfInput, { marginLeft: 6, marginRight: 0 }]}
-                keyboardType="numeric"
-              />
+
+            <View style={styles.doubleFieldRow}>
+              <View style={styles.halfField}>
+                <Text style={styles.fieldLabel}>Username</Text>
+                <TextInput
+                  placeholder="username"
+                  value={username}
+                  onChangeText={setUsername}
+                  style={[styles.halfInput, { marginRight: 6 }]}
+                  autoCapitalize="none"
+                />
+              </View>
+              <View style={styles.halfField}>
+                <Text style={styles.fieldLabel}>Date of Birth</Text>
+                <TextInput
+                  placeholder="DD/MM/YYYY"
+                  value={dateOfBirth}
+                  onChangeText={setDateOfBirth}
+                  style={[styles.halfInput, { marginLeft: 6, marginRight: 0 }]}
+                  keyboardType="numeric"
+                />
+              </View>
             </View>
+
+            <View style={styles.doubleFieldRow}>
+              <View style={styles.halfField}>
+                <Text style={styles.fieldLabel}>Password</Text>
+                <TextInput
+                  placeholder="enter ur password"
+                  value={password}
+                  onChangeText={setPassword}
+                  style={[styles.halfInput, { marginRight: 6 }]}
+                  secureTextEntry
+                />
+              </View>
+              <View style={styles.halfField}>
+                <Text style={styles.fieldLabel}>Confirm Password</Text>
+                <TextInput
+                  placeholder="confirm it"
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  style={[styles.halfInput, { marginLeft: 6, marginRight: 0 }]}
+                  secureTextEntry
+                />
+              </View>
+            </View>
+
+            <Pressable style={styles.createAccountButton} onPress={handleSubmit}>
+              <Text style={styles.createAccountButtonText}>Create account</Text>
+            </Pressable>
+
+            <Pressable onPress={toggleView} style={styles.backToLogin}>
+              <Text style={styles.backToLoginText}>Already have an account? Sign in</Text>
+            </Pressable>
           </View>
-
-          <View style={styles.doubleFieldRow}>
-            <View style={styles.halfField}>
-              <Text style={styles.fieldLabel}>Password</Text>
-              <TextInput
-                placeholder="enter ur password"
-                value={password}
-                onChangeText={setPassword}
-                style={[styles.halfInput, { marginRight: 6 }]}
-                secureTextEntry
-              />
-            </View>
-            <View style={styles.halfField}>
-              <Text style={styles.fieldLabel}>Confirm Password</Text>
-              <TextInput
-                placeholder="confirm it"
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                style={[styles.halfInput, { marginLeft: 6, marginRight: 0 }]}
-                secureTextEntry
-              />
-            </View>
-          </View>
-
-          <Pressable style={styles.createAccountButton} onPress={handleSubmit}>
-            <Text style={styles.createAccountButtonText}>Create account</Text>
-          </Pressable>
-
-          <Pressable onPress={toggleView} style={styles.backToLogin}>
-            <Text style={styles.backToLoginText}>Already have an account? Sign in</Text>
-          </Pressable>
-        </View>
-      )}
+        )}
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -204,7 +209,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  scrollContent: {
     padding: 20,
+    paddingBottom: 40, 
   },
   logoContainer: {
     alignItems: 'center',
@@ -333,7 +341,6 @@ const styles = StyleSheet.create({
     padding: 12,
     fontSize: 15,
     backgroundColor: '#F9FAFB',
-    marginRight: 0, 
   },
   createAccountButton: {
     backgroundColor: '#2563EB',

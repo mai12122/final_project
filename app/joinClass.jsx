@@ -53,7 +53,7 @@ export default function JoinClassroomScreen() {
               text: 'Go to Class', 
               onPress: () => {
                 router.push({
-                  pathname: '/class-detail',
+                  pathname: '/class',
                   params: { 
                     classId: targetClass.code,
                     className: targetClass.name,
@@ -99,16 +99,6 @@ export default function JoinClassroomScreen() {
         style={styles.container}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
       >
-        <View style={styles.header}>
-          <TouchableOpacity 
-            onPress={() => router.back()} 
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          >
-            <Ionicons name="arrow-back" size={24} color="#000" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Join Classroom</Text>
-          <View style={{ width: 24 }} />
-        </View>
 
         <View style={styles.content}>
           <View style={styles.iconCircle}>
@@ -172,22 +162,22 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f8fafc',
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
-    elevation: 1,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#1e293b',
-  },
+  // header: {
+  //   flexDirection: 'row',
+  //   alignItems: 'center',
+  //   justifyContent: 'space-between',
+  //   paddingHorizontal: 20,
+  //   paddingVertical: 16,
+  //   backgroundColor: '#fff',
+  //   borderBottomWidth: 1,
+  //   borderBottomColor: '#e5e7eb',
+  //   elevation: 1,
+  // },
+  // headerTitle: {
+  //   fontSize: 20,
+  //   fontWeight: '700',
+  //   color: '#1e293b',
+  // },
   content: {
     flex: 1,
     alignItems: 'center',
