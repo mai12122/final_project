@@ -11,11 +11,24 @@ import {
   Alert,
 } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
+import {
+  Search as SearchIcon,
+  Bell as BellIcon,
+  BookOpen as ClassIcon,
+  Zap as QuizIcon,
+  Flame as FlameIcon,
+  Trophy as TrophyIcon,
+} from 'lucide-react-native'; 
+
 import { joinClass, joinQuiz, getJoinedClasses, getJoinedQuizzes } from '../../utils/storage';
 
 export default function StudentHomeScreen() {
     const [classes, setClasses] = useState([]);
     const [quizzes, setQuizzes] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
+    const studentName = "Kim YongBok"; 
+    const streakDays = 7;
+    const avgScore = 84;
 
     useFocusEffect(
         useCallback(() => {
@@ -33,9 +46,9 @@ export default function StudentHomeScreen() {
         const success = await joinClass(classData);
         if (success) {
             setClasses(prev => [classData, ...prev]);
-            Alert.alert('Success', `Joined ${classData.name}`);
+            Alert.alert('✅ Success', `Joined ${classData.name}`);
         } else {
-            Alert.alert('Already Joined', 'You are already in this class.');
+            Alert.alert('ℹ️ Already Joined', 'You are already in this class.');
         }
     };
 
@@ -43,15 +56,29 @@ export default function StudentHomeScreen() {
         const success = await joinQuiz(quizData);
         if (success) {
             setQuizzes(prev => [quizData, ...prev]);
-            Alert.alert('Success', `Joined ${quizData.name}`);
+            Alert.alert('🎯 Success', `Joined ${quizData.name}`);
         } else {
-            Alert.alert('Already Joined', 'You have already joined this quiz.');
+            Alert.alert('ℹ️ Already Joined', 'You have already joined this quiz.');
         }
     };
 
+    const filteredClasses = classes.filter(c =>
+        c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (c.lecturer && c.lecturer.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
+
+    const filteredQuizzes = quizzes.filter(q =>
+        q.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (q.classCode && q.classCode.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
+
     const allItems = [
-        ...classes.map(c => ({ ...c, type: 'class' })),
-        ...quizzes.map(q => ({ ...q, type: 'quiz', status: 'Live' })),
+        ...filteredClasses.map(c => ({ ...c, type: 'class', status: null })),
+        ...filteredQuizzes.map(q => ({ 
+            ...q, 
+            type: 'quiz', 
+            status: 'Live'  
+        })),
     ].sort((a, b) => new Date(b.joinedAt) - new Date(a.joinedAt));
 
     return (
@@ -63,39 +90,69 @@ export default function StudentHomeScreen() {
                         style={styles.avatar}
                     />
                 </TouchableOpacity>
+
                 <View style={styles.searchContainer}>
+                    <SearchIcon size={18} color="#888" strokeWidth={2} />
                     <TextInput 
-                        placeholder="Search" 
+                        placeholder="Search classes or quizzes" 
+                        value={searchQuery}
+                        onChangeText={setSearchQuery}
                         style={styles.searchInput}
-                        placeholderTextColor="#9ca3af"
+                        placeholderTextColor="#999"
                     />
-                    <Text style={styles.searchIcon}>🔍</Text>
                 </View>
-                <TouchableOpacity style={styles.bellButton}>
-                    <Text style={styles.bellIcon}>🔔</Text>
+
+                <TouchableOpacity 
+                    style={styles.bellButton}
+                    onPress={() => Alert.alert('🔔', 'Notifications coming soon!')}
+                >
+                    <BellIcon size={22} color="#444" strokeWidth={2} />
                 </TouchableOpacity>
             </View>
 
-            <ScrollView style={styles.scrollContent}>
+            <View style={styles.headerSection}>
+                <Text style={styles.welcomeText}>
+                    Hi, <Text style={styles.nameText}>Kim Yongbok</Text>
+                </Text>
+                <View style={styles.statsRow}>
+                    <View style={styles.statBadge}>
+                        <FlameIcon size={16} color="#FF6B35" strokeWidth={2.5} />
+                        <Text style={styles.statLabel}>{streakDays}d streak</Text>
+                    </View>
+                    <View style={styles.statBadge}>
+                        <TrophyIcon size={16} color="#2563EB" strokeWidth={2.5} />
+                        <Text style={styles.statLabel}>{avgScore}% avg</Text>
+                    </View>
+                </View>
+            </View>
+            <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
                 <View style={styles.actionButtons}>
                     <TouchableOpacity 
-                        style={[styles.actionButton, styles.joinClassroomButton]}
+                        style={[styles.actionButton, styles.joinClassButton]}
                         onPress={() => router.push('/joinClass')}
                     >
-                        <Text style={styles.actionButtonText}>➕ Join Classroom</Text>
+                        <Text style={styles.actionButtonText}>➕ Join Class</Text>
                     </TouchableOpacity>
                     <TouchableOpacity 
                         style={[styles.actionButton, styles.joinQuizButton]}
                         onPress={() => router.push('/joinQuiz')}
                     >
-                        <Text style={styles.actionButtonText}>🔓 Join Quiz</Text>
+                        <Text style={styles.actionButtonText}>🎯 Join Quiz</Text>
                     </TouchableOpacity>
                 </View>
 
-                <Text style={styles.sectionTitle}>My Classes & Quizzes</Text>
+                <Text style={styles.sectionTitle}>
+                    {allItems.length > 0 ? 'Your Classes & Quizzes' : 'Get Started'}
+                </Text>
+
                 <View style={styles.classesList}>
                     {allItems.length === 0 ? (
-                        <Text style={styles.emptyText}>No classes or quizzes yet. Join one to get started!</Text>
+                        <View style={styles.emptyState}>
+                            <Text style={styles.emptyTitle}>No classes or quizzes yet.</Text>
+                            <Text style={styles.emptySubtitle}>
+                                Join a class or quiz!  your streak and progress will show up here!
+                            </Text>
+                        </View>
                     ) : (
                         allItems.map(item => (
                             <TouchableOpacity 
@@ -114,30 +171,38 @@ export default function StudentHomeScreen() {
                                         });
                                     }
                                 }}
+                                activeOpacity={0.92}
                             >
-                                <Text style={styles.classIcon}>
-                                    {item.type === 'class' ? '📚' : '🎯'}
-                                </Text>
-                                <View style={styles.classText}>
+                                <View style={item.type === 'class' ? styles.classIconBg : styles.quizIconBg}>
+                                    {item.type === 'class' ? (
+                                        <ClassIcon size={20} color="#fff" strokeWidth={2} />
+                                    ) : (
+                                        <QuizIcon size={20} color="#fff" strokeWidth={2} />
+                                    )}
+                                </View>
+
+                                <View style={styles.classInfo}>
                                     <Text style={styles.className} numberOfLines={1}>
                                         {item.name}
                                     </Text>
-                                    <Text style={styles.lecturerName}>
+                                    <Text style={styles.metaText} numberOfLines={1}>
                                         {item.type === 'class' 
-                                            ? `by ${item.lecturer}` 
+                                            ? `by ${item.lecturer || '—'}` 
                                             : `Class: ${item.classCode || '—'}`}
                                     </Text>
                                 </View>
+
                                 {item.status === 'Live' && (
                                     <View style={styles.liveBadge}>
-                                        <Text style={styles.liveText}>Live</Text>
+                                        <Text style={styles.liveText}>● Live</Text>
                                     </View>
                                 )}
                             </TouchableOpacity>
                         ))
                     )}
                 </View>
-                <View style={{ height: 80 }} />
+
+                <View style={{ height: 60 }} />
             </ScrollView>
         </SafeAreaView>
     );
@@ -146,79 +211,110 @@ export default function StudentHomeScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f8fafc',
+        backgroundColor: '#F8FAFC',
     },
     topBar: {
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: 20,
-        paddingVertical: 15,
-        backgroundColor: '#fff',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-        elevation: 3,
+        paddingVertical: 12,
+        backgroundColor: '#FFFFFF',
+        borderBottomWidth: 1,
+        borderBottomColor: '#EAECF0',
+        elevation: 1,
     },
     avatar: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        marginRight: 12,
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        marginRight: 14,
+        borderWidth: 2,
+        borderColor: '#F1F5F9',
     },
     searchContainer: {
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#f3f4f6',
-        borderRadius: 20,
-        paddingHorizontal: 15,
+        backgroundColor: '#F1F5F9',
+        borderRadius: 12,
+        paddingHorizontal: 14,
+        height: 42,
         marginHorizontal: 8,
     },
     searchInput: {
         flex: 1,
-        fontSize: 15,
-        color: '#1e293b',
-        paddingVertical: 8,
-    },
-    searchIcon: {
         fontSize: 16,
-        color: '#6b7280',
+        color: '#1E293B',
+        marginLeft: 10,
     },
     bellButton: {
-        padding: 8,
+        padding: 6,
+        marginLeft: 6,
     },
-    bellIcon: {
+    headerSection: {
+        paddingHorizontal: 24,
+        paddingVertical: 16,
+        backgroundColor: '#FFFFFF',
+        borderBottomWidth: 1,
+        borderBottomColor: '#F1F5F9',
+    },
+    welcomeText: {
         fontSize: 20,
-        color: '#1e293b',
+        fontWeight: '700',
+        color: '#0F172A',
+    },
+    nameText: {
+        fontWeight: '800',
+        color: '#1E40AF',
+    },
+    statsRow: {
+        flexDirection: 'row',
+        gap: 16,
+        marginTop: 8,
+    },
+    statBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#F8FAFC',
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#E2E8F0',
+    },
+    statLabel: {
+        fontSize: 13,
+        color: '#475569',
+        marginLeft: 5,
+        fontWeight: '500',
     },
     scrollContent: {
         flex: 1,
         paddingHorizontal: 20,
+        paddingTop: 16,
     },
     actionButtons: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginTop: 20,
-        marginBottom: 24,
+        marginBottom: 28,
     },
     actionButton: {
         flex: 1,
-        paddingVertical: 16,
-        borderRadius: 14,
+        paddingVertical: 15,
+        borderRadius: 12,
         alignItems: 'center',
         marginHorizontal: 5,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
+        shadowOpacity: 0.08,
+        shadowRadius: 6,
+        elevation: 2,
     },
-    joinClassroomButton: {
-        backgroundColor: '#3b82f6',
+    joinClassButton: {
+        backgroundColor: '#3B82F6', 
     },
     joinQuizButton: {
-        backgroundColor: '#a855f7',
+        backgroundColor: '#10B981', 
     },
     actionButtonText: {
         color: '#fff',
@@ -226,59 +322,90 @@ const styles = StyleSheet.create({
         fontSize: 15,
     },
     sectionTitle: {
-        fontSize: 19,
+        fontSize: 20,
         fontWeight: '800',
-        color: '#1e293b',
-        marginVertical: 16,
+        color: '#0F172A',
+        marginBottom: 18,
+        paddingLeft: 4,
     },
     classesList: {
         marginBottom: 24,
     },
     classCard: {
-        backgroundColor: '#fff',
-        borderRadius: 16,
+        backgroundColor: '#FFFFFF',
+        borderRadius: 14,
         padding: 16,
         marginBottom: 14,
         flexDirection: 'row',
         alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#E2E8F0',
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.03,
         shadowRadius: 4,
-        elevation: 2,
+        elevation: 1,
     },
-    classIcon: {
-        fontSize: 26,
+    classIconBg: {
+        width: 42,
+        height: 42,
+        borderRadius: 8,
+        backgroundColor: '#3B82F6',
+        justifyContent: 'center',
+        alignItems: 'center',
         marginRight: 14,
     },
-    classText: {
+    quizIconBg: {
+        width: 42,
+        height: 42,
+        borderRadius: 8,
+        backgroundColor: '#10B981',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 14,
+    },
+    classInfo: {
         flex: 1,
     },
     className: {
         fontSize: 16,
         fontWeight: '600',
-        color: '#1e293b',
+        color: '#1E293B',
     },
-    lecturerName: {
+    metaText: {
         fontSize: 13,
-        color: '#6b7280',
-        marginTop: 2,
+        color: '#64748B',
+        marginTop: 3,
     },
     liveBadge: {
-        backgroundColor: '#ef4444',
-        paddingHorizontal: 8,
-        paddingVertical: 2,
-        borderRadius: 10,
+        backgroundColor: '#FEF3C7',
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 6,
+        borderWidth: 1,
+        borderColor: '#F59E0B',
     },
     liveText: {
-        color: '#fff',
-        fontSize: 11,
+        color: '#D97706',
+        fontSize: 12,
         fontWeight: '600',
     },
-    emptyText: {
+    emptyState: {
+        alignItems: 'center',
+        marginTop: 50,
+        paddingHorizontal: 30,
+    },
+    emptyTitle: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#334155',
         textAlign: 'center',
-        color: '#9ca3af',
-        fontSize: 15,
-        marginTop: 40,
+    },
+    emptySubtitle: {
+        fontSize: 14,
+        color: '#64748B',
+        textAlign: 'center',
+        marginTop: 8,
+        lineHeight: 20,
     },
 });

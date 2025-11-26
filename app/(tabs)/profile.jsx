@@ -6,24 +6,27 @@ import {
   TouchableOpacity,
   View,
   StyleSheet,
-} from "react-native";
-import { useRouter } from "expo-router";
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
+import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
-import React, { useState, createContext, useContext, useEffect } from "react";
+import React, { useState, createContext, useContext, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
+
 const AuthContext = createContext(null);
 
 const AuthProvider = ({ children }) => {
   const router = useRouter();
   const [user, setUser] = useState({
-    id: "user_123",
-    name: "Alex Johnson",
-    email: "alex.j@student.edu",
+    id: 'user_123',
+    name: 'Alex Johnson',
+    email: 'alex.j@student.edu',
   });
 
   const logout = () => {
     setUser(null);
-    router.replace("/auth");
+    router.replace('/auth');
   };
 
   return (
@@ -41,60 +44,83 @@ const useAuth = () => {
   return context;
 };
 
+const requestPermissions = async () => {
+  const { status: libraryStatus } = await ImagePicker.getMediaLibraryPermissionsAsync();
+  if (libraryStatus !== 'granted') {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    return status === 'granted';
+  }
+  return true;
+};
+
 const Profile = () => {
   const router = useRouter();
   const { user, logout } = useAuth();
   const [avatarUri, setAvatarUri] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const avatarSource = avatarUri || user?.avatar || 
-    (user?.name 
-      ? { uri: `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random` }
-      : { uri: 'https://picsum.photos/200/200' }
-    );
-
-  const requestPermissions = async () => {
-    const cameraStatus = await ImagePicker.r4RpVyt7a5nYLLG9f69MT8cCnH9o2xCCgd();
-    const libraryStatus = await ImagePicker.r4RpVyt7a5nYLLG9f69MT8cCnH9o2xCCgd();
-    return {
-      camera: cameraStatus.status === 'granted',
-      library: libraryStatus.status === 'granted',
-    };
+  const getAvatarSource = () => {
+    if (avatarUri) return { uri: avatarUri };
+    if (user && user.avatar) return { uri: user.avatar };
+    if (user && user.name) {
+      const cleanName = encodeURIComponent(user.name.trim().replace(/\s+/g, '+'));
+      return { uri: `https://ui-avatars.com/api/?name=${cleanName}&background=6366f1&color=fff&size=200` };
+    }
+    return { uri: 'https://picsum.photos/200/200' };
   };
 
   const pickImage = async () => {
-    const permissions = await requestPermissions();
-    if (!permissions.library) {
-      alert("Permission to access photos is required!");
+    setLoading(true);
+    const hasPermission = await requestPermissions();
+    setLoading(false);
+
+    if (!hasPermission) {
+      Alert.alert(
+        'Permission Required',
+        'We need access to your photo library to change your avatar.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Open Settings', onPress: () => ImagePicker.openSettings() },
+        ]
+      );
       return;
     }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.8,
-    });
-    if (!result.canceled) {
-      setAvatarUri(result.assets[0].uri);
+
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets && result.assets[0]?.uri) {
+        setAvatarUri(result.assets[0].uri);
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to pick an image. Please try again.');
     }
   };
 
-  const handleEditAvatar = () => {
-    pickImage();
+  const handleLogout = () => {
+    Alert.alert(
+      'Confirm Logout',
+      'Are you sure you want to log out?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Log Out', style: 'destructive', onPress: logout },
+      ]
+    );
   };
 
-  const handleLogout = async () => {
-    await logout();
-  };
-
-  const academicYear = "2nd Year";
+  const academicYear = '2nd Year';
   const averageScore = 84;
+  const streakDays = 7;
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.headerContainer}>
-        <TouchableOpacity 
-          onPress={() => router.back()}
-          style={styles.backButton}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#000" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>My Profile</Text>
@@ -108,37 +134,33 @@ const Profile = () => {
       >
         <View style={styles.profileCard}>
           <View style={styles.avatarWrapper}>
-            <Image
-              source={avatarSource}
-              style={styles.avatarImage}
-            />
-            <TouchableOpacity 
-              style={styles.editButton} 
-              onPress={handleEditAvatar}
-            >
-              <Ionicons name="camera-outline" size={18} color="#fff" />
+            <Image source={getAvatarSource()} style={styles.avatarImage} />
+            <TouchableOpacity style={styles.editButton} onPress={pickImage} disabled={loading}>
+              {loading ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Ionicons name="camera-outline" size={18} color="#fff" />
+              )}
             </TouchableOpacity>
           </View>
 
-          <Text style={styles.userNameText}>
-            {user?.name || "Guest User"}
-          </Text>
-          <Text style={styles.userEmailText}>
-            {user?.email}
-          </Text>
+          <Text style={styles.userNameText}>{user ? user.name : 'Guest User'}</Text>
+          <Text style={styles.userEmailText}>{user ? user.email : '—'}</Text>
 
           <View style={styles.badgesRow}>
             <View style={[styles.badge, { backgroundColor: '#e0f2fe' }]}>
               <Ionicons name="school-outline" size={14} color="#0ea5e9" />
-              <Text style={[styles.badgeText, { color: '#0ea5e9' }]}>
-                {academicYear}
-              </Text>
+              <Text style={[styles.badgeText, { color: '#0ea5e9' }]}>{academicYear}</Text>
             </View>
             <View style={[styles.badge, { backgroundColor: '#fef3c7' }]}>
               <Ionicons name="star-outline" size={14} color="#f59e0b" />
               <Text style={[styles.badgeText, { color: '#f59e0b' }]}>
                 Avg: {averageScore}%
               </Text>
+            </View>
+            <View style={[styles.badge, { backgroundColor: '#dcfce7' }]}>
+              <Ionicons name="flame" size={14} color="#22c55e" />
+              <Text style={[styles.badgeText, { color: '#22c55e' }]}>7-Day Streak</Text>
             </View>
           </View>
         </View>
@@ -155,12 +177,6 @@ const Profile = () => {
     </SafeAreaView>
   );
 };
-
-const ProfileWithProvider = () => (
-  <AuthProvider>
-    <Profile />
-  </AuthProvider>
-);
 
 const styles = StyleSheet.create({
   safeArea: { 
@@ -218,7 +234,6 @@ const styles = StyleSheet.create({
     height: 140, 
     borderRadius: 70,
     backgroundColor: '#f3f4f6',
-    overflow: 'hidden',
   },
   editButton: { 
     position: 'absolute',
@@ -248,6 +263,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 10,
     marginTop: 8,
+    flexWrap: 'wrap',
+    justifyContent: 'center',
   },
   badge: {
     flexDirection: 'row',
@@ -290,4 +307,10 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ProfileWithProvider;
+export default function ProfileWithProvider() {
+  return (
+    <AuthProvider>
+      <Profile />
+    </AuthProvider>
+  );
+}

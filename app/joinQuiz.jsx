@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { findQuizByCode } from '../constants/Data'; // ✅ Consistent import
+import { findQuizByCode } from '../constants/Data'; 
 
 export default function JoinQuizScreen() {
   const [code, setCode] = useState(['', '', '', '', '', '']);
