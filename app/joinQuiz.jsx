@@ -84,7 +84,7 @@ export default function JoinQuizScreen() {
           },
           {
             text: 'Home',
-            onPress: () => router.replace('/(tabs)/index'),
+            onPress: () => router.replace('/(tabs)/home'),
             style: 'cancel',
           },
         ]

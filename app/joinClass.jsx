@@ -64,7 +64,7 @@ export default function JoinClassroomScreen() {
             },
             {
               text: 'Home',
-              onPress: () => router.replace('/(tabs)/index'),
+              onPress: () => router.replace('/(tabs)/home'),
               style: 'cancel',
             },
           ]
