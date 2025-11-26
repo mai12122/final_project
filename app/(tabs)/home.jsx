@@ -1,31 +1,33 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { 
-    View, 
-    Text, 
-    TextInput, 
-    TouchableOpacity, 
-    StyleSheet, 
-    Image, 
-    ScrollView,
-    SafeAreaView,
-    Alert,
+  View, 
+  Text, 
+  TextInput, 
+  TouchableOpacity, 
+  StyleSheet, 
+  Image, 
+  ScrollView,
+  SafeAreaView,
+  Alert,
 } from 'react-native';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { joinClass, joinQuiz, getJoinedClasses, getJoinedQuizzes } from '../../utils/storage';
 
 export default function StudentHomeScreen() {
     const [classes, setClasses] = useState([]);
     const [quizzes, setQuizzes] = useState([]);
 
-    useEffect(() => {
-        const load = async () => {
-            const loadedClasses = await getJoinedClasses();
-            const loadedQuizzes = await getJoinedQuizzes();
-            setClasses(loadedClasses);
-            setQuizzes(loadedQuizzes);
-        };
-        load();
-    }, []);
+    useFocusEffect(
+        useCallback(() => {
+            const load = async () => {
+                const loadedClasses = await getJoinedClasses();
+                const loadedQuizzes = await getJoinedQuizzes();
+                setClasses(loadedClasses);
+                setQuizzes(loadedQuizzes);
+            };
+            load();
+        }, [])
+    );
 
     const handleJoinClass = async (classData) => {
         const success = await joinClass(classData);
@@ -78,13 +80,13 @@ export default function StudentHomeScreen() {
                 <View style={styles.actionButtons}>
                     <TouchableOpacity 
                         style={[styles.actionButton, styles.joinClassroomButton]}
-                        onPress={() => router.push('/join-classroom')}
+                        onPress={() => router.push('/joinClass')}
                     >
                         <Text style={styles.actionButtonText}>➕ Join Classroom</Text>
                     </TouchableOpacity>
                     <TouchableOpacity 
                         style={[styles.actionButton, styles.joinQuizButton]}
-                        onPress={() => router.push('/join-quiz')}
+                        onPress={() => router.push('/joinQuiz')}
                     >
                         <Text style={styles.actionButtonText}>🔓 Join Quiz</Text>
                     </TouchableOpacity>

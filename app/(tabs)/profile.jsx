@@ -11,8 +11,6 @@ import { useRouter } from "expo-router";
 import * as ImagePicker from 'expo-image-picker';
 import React, { useState, createContext, useContext, useEffect } from "react";
 import { Ionicons } from '@expo/vector-icons';
-
-// ====== MOCK AUTH CONTEXT (inline for simplicity) ======
 const AuthContext = createContext(null);
 
 const AuthProvider = ({ children }) => {
@@ -42,7 +40,6 @@ const useAuth = () => {
   }
   return context;
 };
-// =======================================================
 
 const Profile = () => {
   const router = useRouter();
